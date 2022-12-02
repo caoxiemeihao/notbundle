@@ -21,7 +21,10 @@
   "peerDependencies": {
     "esbuild": "*"
   },
-  "dependencies": {},
+  "dependencies": {
+    "chokidar": "^3.5.3",
+    "fast-glob": "^3.2.12"
+  },
   "devDependencies": {
     "@types/node": "^18.11.10",
     "esbuild": "^0.15.16",
