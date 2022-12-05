@@ -10,7 +10,7 @@ Inspired by Vite's Not Bundle, building ts for use in Node.js.
 ## Install
 
 ```sh
-npm i notbundle -D
+npm i notbundle
 ```
 
 ## Usage
@@ -70,5 +70,32 @@ export interface Configuration {
   transformOptions?: import('esbuild').TransformOptions
   /** Options of `chokidar.watch()` */
   watch?: import('chokidar').WatchOptions
+}
+```
+
+###### `ResolvedConfig`
+
+```ts
+export interface ResolvedConfig {
+  /** @default process.cwd() */
+  root: string
+  /** Relative path */
+  include: string[]
+  /** Absolute path */
+  output?: string
+  plugins: Required<Configuration>['plugins']
+  /** Options of `esbuild.transform()` */
+  transformOptions: import('esbuild').TransformOptions
+
+  config: Configuration
+  /** @default ['.ts', '.tsx', '.js', '.jsx'] */
+  extensions: string[]
+  watcher: import('chokidar').FSWatcher | null
+  /** Internal functions (🚨 Experimental) */
+  experimental: {
+    include2files: (config: ResolvedConfig, include?: string[]) => string[]
+    include2globs: (config: ResolvedConfig, include?: string[]) => string[]
+    replace2dest: (filename: string) => string | undefined
+  }
 }
 ```
