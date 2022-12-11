@@ -77,7 +77,7 @@ export interface Configuration {
 
 ```ts
 export interface ResolvedConfig {
-  /** @default process.cwd() */
+  /** Absolute path */
   root: string
   /** Relative path */
   include: string[]

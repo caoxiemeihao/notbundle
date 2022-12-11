@@ -84,7 +84,7 @@ async function doBuild(config: ResolvedConfig, filename: string): Promise<BuildR
     logger.log(
       colours.cyan('[write]'),
       colours.gary(new Date().toLocaleTimeString()),
-      `${destname}`,
+      `${path.relative(config.root, destname)}`,
     )
 
     return {
