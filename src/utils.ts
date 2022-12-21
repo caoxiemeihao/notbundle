@@ -40,24 +40,6 @@ export function jsType(filename: string) {
   }
 }
 
-function log(type: 'error' | 'info' | 'success' | 'warn', ...message: string[]) {
-  const dict: Record<Parameters<typeof log>[1], Exclude<keyof typeof colours, '$_$'>> = {
-    error: 'red',
-    info: 'cyan',
-    success: 'green',
-    warn: 'yellow',
-  }
-  message = message.map(msg => colours[dict[type]](msg))
-  console.log(...message)
-}
-export const logger: Record<Parameters<typeof log>[0] | 'log', (...message: string[]) => void> = {
-  error: (...message: string[]) => log('error', ...message),
-  info: (...message: string[]) => log('info', ...message),
-  success: (...message: string[]) => log('success', ...message),
-  warn: (...message: string[]) => log('warn', ...message),
-  log: (...message: string[]) => console.log(...message),
-}
-
 const isWindows = os.platform() === 'win32'
 function slash(p: string): string {
   return p.replace(/\\/g, '/')

@@ -5,7 +5,7 @@ import {
   type ResolvedConfig,
   resolveConfig,
 } from './config'
-import { colours, logger, ensureDir } from './utils'
+import { colours, ensureDir } from './utils'
 
 export type BuildResult = {
   filename: string
@@ -25,11 +25,19 @@ export async function build(config: Configuration): Promise<BuildResult[]> {
 }
 
 async function doBuild(config: ResolvedConfig, filename: string): Promise<BuildResult> {
+  const {
+    root,
+    output,
+    plugins,
+    experimental,
+    logger,
+  } = config
+  const { } = logger
   let code = fs.readFileSync(filename, 'utf8')
   let mappings: string | SourceMap = '' // TODO: merge mappings 🤔
 
   let done = false
-  for (const plugin of config.plugins) {
+  for (const plugin of plugins) {
     if (done) break
     // call transform hooks
     const result = await plugin.transform?.({
@@ -51,8 +59,8 @@ async function doBuild(config: ResolvedConfig, filename: string): Promise<BuildR
     }
   }
 
-  if (config.output) {
-    const destname = config.experimental.replace2dest(filename)!
+  if (output) {
+    const destname = experimental.replace2dest(filename)!
     if (destname === filename) {
       const message = `Input and output are the same file\n  ${filename} -> ${destname}`
       throw new Error(message)
@@ -84,7 +92,7 @@ async function doBuild(config: ResolvedConfig, filename: string): Promise<BuildR
     logger.log(
       colours.cyan('[write]'),
       colours.gary(new Date().toLocaleTimeString()),
-      `${path.relative(config.root, destname)}`,
+      `${path.relative(root, destname)}`,
     )
 
     return {
