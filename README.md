@@ -16,18 +16,25 @@ npm i notbundle
 ## Usage
 
 ```js
-import notbundle from 'notbundle'
+import {
+  type Configuration,
+  build,
+  watch,
+} from 'notbundle'
 
-notbundle({
+const config: Configuration = {
   include: ['src'],
   output: 'dist',
-  watch: {},
-})
+}
+
+build(config)
+// or
+watch(config)
 ```
 
 ## API <sub><sup>(Define)</sup></sub>
 
-###### `notbundle(config: Configuration)`
+###### `Configuration`
 
 ```ts
 export interface Configuration {
@@ -66,6 +73,10 @@ export interface Configuration {
       destname: string
     }) => void
   }[],
+  /** Custom log. If `logger` is passed, all logs will be input this option */
+  logger?: {
+    [type in 'error' | 'info' | 'success' | 'warn' | 'log']?: (...message: string[]) => void
+  },
   /** Options of `esbuild.transform()` */
   transformOptions?: import('esbuild').TransformOptions
   /** Options of `chokidar.watch()` */
@@ -83,14 +94,14 @@ export interface ResolvedConfig {
   include: string[]
   /** Absolute path */
   output?: string
-  plugins: Required<Configuration>['plugins']
+  plugins: NonNullable<Configuration['plugins']>
+  logger: Required<NonNullable<Configuration['logger']>>
   /** Options of `esbuild.transform()` */
   transformOptions: import('esbuild').TransformOptions
 
   config: Configuration
   /** @default ['.ts', '.tsx', '.js', '.jsx'] */
   extensions: string[]
-  watcher: import('chokidar').FSWatcher | null
   /** Internal functions (🚨 Experimental) */
   experimental: {
     include2files: (config: ResolvedConfig, include?: string[]) => string[]

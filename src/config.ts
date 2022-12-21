@@ -1,9 +1,12 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import fastGlob from 'fast-glob'
-import { watch } from 'chokidar'
 import { resolvePlugins } from './plugin'
-import { JS_EXTENSIONS, normalizePath } from './utils'
+import {
+  colours,
+  JS_EXTENSIONS,
+  normalizePath,
+} from './utils'
 
 export interface Configuration {
   /** @default process.cwd() */
@@ -41,6 +44,10 @@ export interface Configuration {
       destname: string
     }) => void
   }[],
+  /** Custom log. If `logger` is passed, all logs will be input this option */
+  logger?: {
+    [type in 'error' | 'info' | 'success' | 'warn' | 'log']?: (...message: string[]) => void
+  },
   /** Options of `esbuild.transform()` */
   transformOptions?: import('esbuild').TransformOptions
   /** Options of `chokidar.watch()` */
@@ -54,14 +61,14 @@ export interface ResolvedConfig {
   include: string[]
   /** Absolute path */
   output?: string
-  plugins: Required<Configuration>['plugins']
+  plugins: NonNullable<Configuration['plugins']>
+  logger: Required<NonNullable<Configuration['logger']>>
   /** Options of `esbuild.transform()` */
   transformOptions: import('esbuild').TransformOptions
 
   config: Configuration
   /** @default ['.ts', '.tsx', '.js', '.jsx'] */
   extensions: string[]
-  watcher: import('chokidar').FSWatcher | null
   /** Internal functions (🚨 Experimental) */
   experimental: {
     include2files: (config: ResolvedConfig, include?: string[]) => string[]
@@ -70,7 +77,7 @@ export interface ResolvedConfig {
   }
 }
 
-export type Plugin = Required<Configuration>['plugins'][number]
+export type Plugin = ResolvedConfig['plugins'][number]
 
 export async function resolveConfig(config: Configuration): Promise<ResolvedConfig> {
   const {
@@ -79,17 +86,19 @@ export async function resolveConfig(config: Configuration): Promise<ResolvedConf
     output,
     transformOptions,
   } = config
-  // https://github.com/vitejs/vite/blob/9a83eaffac3383f5ee68097807de532f0b5cb25c/packages/vite/src/node/config.ts#L456-L459
+  // https://github.com/vitejs/vite/blob/v4.0.1/packages/vite/src/node/config.ts#L459-L462
   // resolve root
   const resolvedRoot = normalizePath(
     root ? path.resolve(root) : process.cwd()
   )
 
   const resolved: ResolvedConfig = {
-    plugins: resolvePlugins(config),
     root: resolvedRoot,
     include: include.map(p => normalizePath(p).replace(resolvedRoot + '/', '')),
     output: output ? normalizePath(path.isAbsolute(output) ? output : path.join(resolvedRoot, output)) : output,
+    plugins: resolvePlugins(config),
+    // @ts-ignore
+    logger: config.logger ?? {},
     transformOptions: Object.assign({
       target: 'node14',
       format: 'cjs',
@@ -97,7 +106,6 @@ export async function resolveConfig(config: Configuration): Promise<ResolvedConf
 
     config,
     extensions: JS_EXTENSIONS,
-    watcher: null,
     experimental: {
       include2files,
       include2globs,
@@ -105,9 +113,15 @@ export async function resolveConfig(config: Configuration): Promise<ResolvedConf
     },
   }
 
-  if (config.watch) {
-    resolved.watcher = watch(include2globs(resolved), config.watch)
-  }
+  resolved.logger.error ??= (...msg) => loggerFn('error', ...msg)
+  resolved.logger.info ??= (...msg) => loggerFn('info', ...msg)
+  resolved.logger.success ??= (...msg) => loggerFn('success', ...msg)
+  resolved.logger.warn ??= (...msg) => loggerFn('warn', ...msg)
+  resolved.logger.log ??= (...msg) => loggerFn('log', ...msg)
+
+  // TODO: The first listen will be lost in `import('./watch').watch`.
+  //       Consider removing all `configResolved` in `watch`, and execute them when the `watcher` is created.
+  // resolved.watcher = watch(include2globs(resolved), config.watch)
 
   for (const plugin of resolved.plugins) {
     // call configResolved hooks
@@ -165,4 +179,18 @@ function input2output(
   return config.extensions.includes(extname)
     ? destname.replace(extname, '.js')
     : destname
+}
+
+function loggerFn(type: keyof ResolvedConfig['logger'], ...message: string[]) {
+  if (type !== 'log') {
+    const dict: Record<string, Exclude<keyof typeof colours, '$_$'>> = {
+      error: 'red',
+      info: 'cyan',
+      success: 'green',
+      warn: 'yellow',
+    }
+    const color = dict[type]
+    message = message.map(msg => colours[color](msg))
+  }
+  console.log(...message)
 }
