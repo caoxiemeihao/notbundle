@@ -1,7 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import fastGlob from 'fast-glob'
-import { watch } from 'chokidar'
 import { resolvePlugins } from './plugin'
 import {
   colours,
@@ -70,7 +69,6 @@ export interface ResolvedConfig {
   config: Configuration
   /** @default ['.ts', '.tsx', '.js', '.jsx'] */
   extensions: string[]
-  watcher: import('chokidar').FSWatcher | null
   /** Internal functions (🚨 Experimental) */
   experimental: {
     include2files: (config: ResolvedConfig, include?: string[]) => string[]
@@ -108,7 +106,6 @@ export async function resolveConfig(config: Configuration): Promise<ResolvedConf
 
     config,
     extensions: JS_EXTENSIONS,
-    watcher: null,
     experimental: {
       include2files,
       include2globs,
@@ -122,9 +119,9 @@ export async function resolveConfig(config: Configuration): Promise<ResolvedConf
   resolved.logger.warn ??= (...msg) => loggerFn('warn', ...msg)
   resolved.logger.log ??= (...msg) => loggerFn('log', ...msg)
 
-  if (config.watch) {
-    resolved.watcher = watch(include2globs(resolved), config.watch)
-  }
+  // TODO: The first listen will be lost in `import('./watch').watch`.
+  //       Consider removing all `configResolved` in `watch`, and execute them when the `watcher` is created.
+  // resolved.watcher = watch(include2globs(resolved), config.watch)
 
   for (const plugin of resolved.plugins) {
     // call configResolved hooks

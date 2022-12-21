@@ -1,5 +1,5 @@
 import fs from 'node:fs'
-import type { FSWatcher } from 'chokidar'
+import { type FSWatcher, watch as watch2 } from 'chokidar'
 import { build } from './build'
 import {
   type Configuration,
@@ -9,11 +9,9 @@ import { ensureDir, jsType, normalizePath } from './utils'
 
 export async function watch(config: Configuration): Promise<FSWatcher> {
   if (!config.watch) config.watch = {}
-  const {
-    experimental,
-    plugins,
-    watcher,
-  } = await resolveConfig(config)
+  const resolved = await resolveConfig(config)
+  const { experimental, plugins } = resolved
+  const watcher = watch2(experimental.include2globs(resolved), config.watch)
 
   // There can't be any await statement here, it will cause `watcher.on` to miss the first trigger.
   watcher?.on('all', async (event, _filepath) => {
@@ -66,5 +64,5 @@ export async function watch(config: Configuration): Promise<FSWatcher> {
     }
   })
 
-  return watcher!
+  return watcher
 }
