@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import { type FSWatcher, watch as watch2 } from 'chokidar'
-import { build } from './build'
+import { buildFile } from './build'
 import {
   type Configuration,
   resolveConfig,
@@ -32,7 +32,7 @@ export async function watch(config: Configuration): Promise<FSWatcher> {
       case 'add':
       case 'change': {
         if (js_type.js) {
-          await build(config)
+          await buildFile(resolved, filepath)
         } else if (js_type.static) {
           // static files
           fs.copyFileSync(filepath, ensureDir(destpath))

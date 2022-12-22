@@ -20,11 +20,11 @@ export async function build(config: Configuration): Promise<BuildResult[]> {
   const resolved = await resolveConfig(config)
   return Promise.all(
     resolved.experimental.include2files(resolved)
-      .map(filename => doBuild(resolved, filename))
+      .map(filename => buildFile(resolved, filename))
   )
 }
 
-async function doBuild(config: ResolvedConfig, filename: string): Promise<BuildResult> {
+export async function buildFile(config: ResolvedConfig, filename: string): Promise<BuildResult> {
   const {
     root,
     output,
