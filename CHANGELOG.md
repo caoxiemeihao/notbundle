@@ -1,3 +1,7 @@
+## 0.2.1 (2022-12-22)
+
+- 87b4da1 fix: `buildFile` instead `build`, avoid `resolveConfig` repeat execution.
+
 ## 0.2.0 (2022-12-21)
 
 - 55d643a docs: v0.2.0
