@@ -3,18 +3,12 @@ import path from 'node:path'
 import {
   type Configuration,
   type ResolvedConfig,
+  type Plugin,
   resolveConfig,
 } from './config'
-import { colours, ensureDir } from './utils'
+import { ensureDir, jsType } from './utils'
 
-export type BuildResult = {
-  filename: string
-  destname: string
-} | {
-  filename: string
-  code: string
-  map: string
-}
+export type BuildResult = Parameters<NonNullable<Plugin['ondone']>>[0]
 
 export async function build(config: Configuration): Promise<BuildResult[]> {
   const resolved = await resolveConfig(config)
@@ -27,14 +21,14 @@ export async function build(config: Configuration): Promise<BuildResult[]> {
 export async function buildFile(config: ResolvedConfig, filename: string): Promise<BuildResult> {
   const {
     root,
-    output,
     plugins,
     experimental,
     logger,
   } = config
-  const { } = logger
   let code = fs.readFileSync(filename, 'utf8')
-  let mappings: string | SourceMap = '' // TODO: merge mappings 🤔
+  let map: string | undefined // TODO: merge map 🤔
+  const destname = experimental.replace2dest(filename)
+  const buildResult = { filename, destname } as BuildResult
 
   let done = false
   for (const plugin of plugins) {
@@ -51,16 +45,13 @@ export async function buildFile(config: ResolvedConfig, filename: string): Promi
     } else if (Object.prototype.toString.call(result) === '[object Object]') {
       code = result.code
       if (result.map != null) {
-        mappings = result.map
-      }
-      if (result.warnings.length) {
-        logger.warn(result.warnings.map(e => e.text).join('\n'))
+        // If the plugin does not return a map, then the previous map will be used.
+        map = result.map
       }
     }
   }
 
-  if (output) {
-    const destname = experimental.replace2dest(filename)!
+  if (destname) { // output has value
     if (destname === filename) {
       const message = `Input and output are the same file\n  ${filename} -> ${destname}`
       throw new Error(message)
@@ -68,44 +59,35 @@ export async function buildFile(config: ResolvedConfig, filename: string): Promi
 
     ensureDir(destname)
 
-    if (mappings) {
-      let map: SourceMap
-      if (typeof mappings === 'string') {
-        try {
-          map = JSON.parse(mappings)
-        } catch (error) {
-          logger.warn('[sourcemap]:\n', error as string)
-        }
-      } else {
-        map = mappings
+    if (map != null) {
+      let mappings: SourceMap
+      try {
+        mappings = JSON.parse(map)
+      } catch (error) {
+        logger.warn('[sourcemap]:\n', error as string)
       }
-      if (map!) {
+      if (mappings!) {
         const parsed = path.parse(destname)
-        map.file = parsed.base
-        map.sources = [path.relative(parsed.dir, filename)]
-        fs.writeFileSync(destname + '.map', JSON.stringify(map))
+        mappings.file = parsed.base
+        mappings.sources = [path.relative(parsed.dir, filename)]
+        fs.writeFileSync(destname + '.map', JSON.stringify(mappings))
         code += `\n//# sourceMappingURL=${path.basename(destname)}.map`
       }
     }
 
     fs.writeFileSync(destname, code)
-    logger.log(
-      colours.cyan('[write]'),
-      colours.gary(new Date().toLocaleTimeString()),
-      `${path.relative(root, destname)}`,
-    )
-
-    return {
-      filename,
-      destname,
-    }
-  } else {
-    return {
-      filename,
-      code,
-      map: mappings,
-    }
+    logger.info('[write]', new Date().toLocaleTimeString(), `${path.relative(root, destname)}`)
   }
+
+  buildResult.code = code
+  buildResult.map = map
+
+  for (const plugin of plugins) {
+    // call ondone hooks
+    plugin.ondone?.(buildResult)
+  }
+
+  return buildResult
 }
 
 /**

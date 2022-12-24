@@ -4,8 +4,9 @@ Inspired by Vite's Not Bundle, building ts for use in Node.js.
 [![NPM version](https://img.shields.io/npm/v/notbundle.svg)](https://npmjs.org/package/notbundle)
 [![NPM Downloads](https://img.shields.io/npm/dm/notbundle.svg)](https://npmjs.org/package/notbundle)
 
-- 🚀 High-performance <sub><sup>(Based on esbuild)</sup></sub>
+- 🚀 High-performance <sub><sup>(Based on swc)</sup></sub>
 - ⚡️ Support Plugin <sub><sup>(Like Vite's plugin)</sup></sub>
+- 🌱 Really simple <sub><sup>(Few APIs)</sup></sub>
 
 ## Install
 
@@ -30,6 +31,26 @@ const config: Configuration = {
 build(config)
 // or
 watch(config)
+```
+
+## JavaScript API
+
+```ts
+import {
+  type Configuration,
+  type ResolvedConfig,
+  resolveConfig,
+
+  type BuildResult,
+  build,
+  type FSWatcher ,
+  watch,
+
+  // For custom logger
+  colours,
+  // Convert path to POSIX
+  normalizePath,
+} from 'notbundle'
 ```
 
 ## API <sub><sup>(Define)</sup></sub>
@@ -66,19 +87,21 @@ export interface Configuration {
       code: string
       /** Skip subsequent transform hooks */
       done: () => void
-    }) => string | null | void | import('esbuild').TransformResult | Promise<string | null | void | import('esbuild').TransformResult>
+    }) => string | null | void | import('@swc/core').Output | Promise<string | null | void | import('@swc/core').Output>
     /** Triggered when `transform()` ends or a file in `extensions` is removed */
     ondone?: (args: {
       filename: string
-      destname: string
+      code: string
+      map?: string
+      destname?: string
     }) => void
   }[],
   /** Custom log. If `logger` is passed, all logs will be input this option */
   logger?: {
     [type in 'error' | 'info' | 'success' | 'warn' | 'log']?: (...message: string[]) => void
   },
-  /** Options of `esbuild.transform()` */
-  transformOptions?: import('esbuild').TransformOptions
+  /** Options of swc `transform()` */
+  transformOptions?: import('@swc/core').Options
   /** Options of `chokidar.watch()` */
   watch?: import('chokidar').WatchOptions
 }
@@ -96,16 +119,18 @@ export interface ResolvedConfig {
   output?: string
   plugins: NonNullable<Configuration['plugins']>
   logger: Required<NonNullable<Configuration['logger']>>
-  /** Options of `esbuild.transform()` */
-  transformOptions: import('esbuild').TransformOptions
+  /** Options of swc `transform()` */
+  transformOptions: import('@swc/core').Options
 
   config: Configuration
   /** @default ['.ts', '.tsx', '.js', '.jsx'] */
   extensions: string[]
   /** Internal functions (🚨 Experimental) */
   experimental: {
+    /** Only files of type `config.extensions` are included */
     include2files: (config: ResolvedConfig, include?: string[]) => string[]
     include2globs: (config: ResolvedConfig, include?: string[]) => string[]
+    /** If include contains only one item, it will remove 1 level of dir 🤔 */
     replace2dest: (filename: string) => string | undefined
   }
 }

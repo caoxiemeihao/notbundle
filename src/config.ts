@@ -37,19 +37,21 @@ export interface Configuration {
       code: string
       /** Skip subsequent transform hooks */
       done: () => void
-    }) => string | null | void | import('esbuild').TransformResult | Promise<string | null | void | import('esbuild').TransformResult>
+    }) => string | null | void | import('@swc/core').Output | Promise<string | null | void | import('@swc/core').Output>
     /** Triggered when `transform()` ends or a file in `extensions` is removed */
     ondone?: (args: {
       filename: string
-      destname: string
+      code: string
+      map?: string
+      destname?: string
     }) => void
   }[],
   /** Custom log. If `logger` is passed, all logs will be input this option */
   logger?: {
     [type in 'error' | 'info' | 'success' | 'warn' | 'log']?: (...message: string[]) => void
   },
-  /** Options of `esbuild.transform()` */
-  transformOptions?: import('esbuild').TransformOptions
+  /** Options of swc `transform()` */
+  transformOptions?: import('@swc/core').Options
   /** Options of `chokidar.watch()` */
   watch?: import('chokidar').WatchOptions
 }
@@ -63,16 +65,18 @@ export interface ResolvedConfig {
   output?: string
   plugins: NonNullable<Configuration['plugins']>
   logger: Required<NonNullable<Configuration['logger']>>
-  /** Options of `esbuild.transform()` */
-  transformOptions: import('esbuild').TransformOptions
+  /** Options of swc `transform()` */
+  transformOptions: import('@swc/core').Options
 
   config: Configuration
   /** @default ['.ts', '.tsx', '.js', '.jsx'] */
   extensions: string[]
   /** Internal functions (🚨 Experimental) */
   experimental: {
+    /** Only files of type `config.extensions` are included */
     include2files: (config: ResolvedConfig, include?: string[]) => string[]
     include2globs: (config: ResolvedConfig, include?: string[]) => string[]
+    /** If include contains only one item, it will remove 1 level of dir 🤔 */
     replace2dest: (filename: string) => string | undefined
   }
 }
@@ -84,7 +88,7 @@ export async function resolveConfig(config: Configuration): Promise<ResolvedConf
     root,
     include,
     output,
-    transformOptions,
+    transformOptions = {},
   } = config
   // https://github.com/vitejs/vite/blob/v4.0.1/packages/vite/src/node/config.ts#L459-L462
   // resolve root
@@ -99,10 +103,7 @@ export async function resolveConfig(config: Configuration): Promise<ResolvedConf
     plugins: resolvePlugins(config),
     // @ts-ignore
     logger: config.logger ?? {},
-    transformOptions: Object.assign({
-      target: 'node14',
-      format: 'cjs',
-    }, transformOptions),
+    transformOptions,
 
     config,
     extensions: JS_EXTENSIONS,
@@ -143,13 +144,10 @@ function include2globs(config: ResolvedConfig, files = config.include) {
   return files
     .map(file => path.posix.join(config.root, file))
     .map(file => {
-      try {
-        const stat = fs.statSync(file)
-        if (stat.isDirectory()) {
-          return path.posix.join(file, '**/*')
-        }
-      } catch { }
-      return file
+      const stat = fs.statSync(file)
+      return stat.isDirectory()
+        ? path.posix.join(file, '**/*')
+        : file
     })
 }
 
