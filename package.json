@@ -1,6 +1,6 @@
 {
   "name": "notbundle",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Inspired by Vite's Not Bundle, building ts for use in Node.js.",
   "main": "index.js",
   "types": "types",
