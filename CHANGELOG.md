@@ -1,3 +1,8 @@
+## 0.3.0 (2022-12-24)
+
+- 985ba83 feat: test 🌱
+- ae03e06 refactor!: `swc` instead `esbuild`
+
 ## 0.2.1 (2022-12-22)
 
 - 87b4da1 fix: `buildFile` instead `build`, avoid `resolveConfig` repeat execution.
