@@ -14,7 +14,7 @@ export default defineConfig({
     },
     rollupOptions: {
       external: [
-        'esbuild',
+        '@swc/core',
         ...builtinModules,
         ...builtinModules.map(m => `node:${m}`),
         ...Object.keys(pkg.dependencies),

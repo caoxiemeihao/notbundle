@@ -6,4 +6,4 @@ export {
 export { type BuildResult, build } from './build'
 export { type FSWatcher } from 'chokidar'
 export { watch } from './watch'
-export { normalizePath } from './utils'
+export { colours, normalizePath } from './utils'

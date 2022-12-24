@@ -4,7 +4,7 @@ Inspired by Vite's Not Bundle, building ts for use in Node.js.
 [![NPM version](https://img.shields.io/npm/v/notbundle.svg)](https://npmjs.org/package/notbundle)
 [![NPM Downloads](https://img.shields.io/npm/dm/notbundle.svg)](https://npmjs.org/package/notbundle)
 
-- 🚀 High-performance <sub><sup>(Based on esbuild)</sup></sub>
+- 🚀 High-performance <sub><sup>(Based on swc)</sup></sub>
 - ⚡️ Support Plugin <sub><sup>(Like Vite's plugin)</sup></sub>
 
 ## Install
