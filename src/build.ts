@@ -59,7 +59,7 @@ export async function buildFile(config: ResolvedConfig, filename: string): Promi
 
     ensureDir(destname)
 
-    if (map != null) {
+    if (map) {
       let mappings: SourceMap
       try {
         mappings = JSON.parse(map)
