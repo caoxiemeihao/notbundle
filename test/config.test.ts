@@ -17,6 +17,16 @@ const testConfig: Configuration = {
   include: ['input'],
   output: 'output'
 }
+const swcOptions: import('@swc/core').Options = {
+  env: {
+    targets: {
+      node: '14',
+    },
+  },
+  module: {
+    type: 'commonjs',
+  },
+}
 
 describe('src/config', () => {
   it('resolveConfig', async () => {
@@ -41,7 +51,7 @@ describe('src/config', () => {
     expectTypeOf(logger.log).toBeFunction()
     expectTypeOf(logger.success).toBeFunction()
 
-    expect(JSON.stringify(transformOptions)).eq('{}')
+    expect(transformOptions).toEqual(swcOptions)
     expect(config).toEqual(testConfig)
     expect(extensions).toEqual(['.ts', '.tsx', '.js', '.jsx'])
 

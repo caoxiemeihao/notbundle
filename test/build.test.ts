@@ -37,7 +37,7 @@ describe('src/build', () => {
     for (const { filename, destname } of await build(testConfig)) {
       expect(destname).string
       const basename = path.basename(filename)
-      const { message } = await import(destname!)
+      const { message } = require(destname!)
       expect(message).eq(basename)
 
       fs.rmSync(path.join(root, testConfig.output!), { recursive: true, force: true })
