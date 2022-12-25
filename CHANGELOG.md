@@ -1,3 +1,8 @@
+## 0.3.1 (2022-12-25)
+
+- f804b6d fix: sourcemap warn
+- c4e29fa fix: removable plugin
+
 ## 0.3.0 (2022-12-24)
 
 - 985ba83 feat: test 🌱

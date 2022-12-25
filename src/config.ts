@@ -88,6 +88,7 @@ export async function resolveConfig(config: Configuration): Promise<ResolvedConf
     root,
     include,
     output,
+    logger = {},
     transformOptions = {},
   } = config
   // https://github.com/vitejs/vite/blob/v4.0.1/packages/vite/src/node/config.ts#L459-L462
@@ -102,7 +103,7 @@ export async function resolveConfig(config: Configuration): Promise<ResolvedConf
     output: output ? normalizePath(path.isAbsolute(output) ? output : path.join(resolvedRoot, output)) : output,
     plugins: resolvePlugins(config),
     // @ts-ignore
-    logger: config.logger ?? {},
+    logger,
     transformOptions,
 
     config,
