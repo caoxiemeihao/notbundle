@@ -1,4 +1,5 @@
 export {
+  type Plugin,
   type Configuration,
   type ResolvedConfig,
   resolveConfig,
