@@ -24,7 +24,7 @@ function swc(): Plugin {
       const transformOptions = _config.transformOptions
       transformOptions.env ??= {}
       transformOptions.env.targets ??= {}
-      transformOptions.env.targets.node = '14'
+      transformOptions.env.targets.node ??= '14'
       transformOptions.module ??= { type: 'commonjs' }
     },
     async transform({ filename, code }) {
