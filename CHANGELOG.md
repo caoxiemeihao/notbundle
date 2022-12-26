@@ -1,3 +1,8 @@
+## 0.3.2 (2022-12-26)
+
+- 952ccd8 fix: assign default node version
+- e4773cb feat: export `type Plugin`
+
 ## 0.3.1 (2022-12-25)
 
 - f804b6d fix: sourcemap warn
