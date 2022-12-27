@@ -1,3 +1,7 @@
+## 0.3.3 (2022-12-27)
+
+- ef98ee9 fix: include2globs try resolve files
+
 ## 0.3.2 (2022-12-26)
 
 - 952ccd8 fix: assign default node version
