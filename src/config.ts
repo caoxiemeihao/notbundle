@@ -145,11 +145,20 @@ function include2globs(config: ResolvedConfig, files = config.include) {
   return files
     .map(file => path.posix.join(config.root, file))
     .map(file => {
-      const stat = fs.statSync(file)
-      return stat.isDirectory()
-        ? path.posix.join(file, '**/*')
-        : file
+      if (fs.existsSync(file)) {
+        return fs.statSync(file).isDirectory()
+          ? path.posix.join(file, '**/*')
+          : file
+      }
+      // Try resolve file
+      for (const ext of config.extensions) {
+        let filename = file + ext
+        if (fs.existsSync(filename)) {
+          return filename
+        }
+      }
     })
+    .filter(file => file != null) as string[]
 }
 
 function input2output(
