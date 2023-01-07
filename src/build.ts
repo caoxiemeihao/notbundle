@@ -6,7 +6,7 @@ import {
   type Plugin,
   resolveConfig,
 } from './config'
-import { ensureDir, jsType } from './utils'
+import { ensureDir } from './utils'
 
 export type BuildResult = Parameters<NonNullable<Plugin['ondone']>>[0]
 
