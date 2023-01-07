@@ -6,7 +6,7 @@ import {
   type Plugin,
   resolveConfig,
 } from './config'
-import { ensureDir, jsType } from './utils'
+import { ensureDir } from './utils'
 
 export type BuildResult = Parameters<NonNullable<Plugin['ondone']>>[0]
 
@@ -84,7 +84,7 @@ export async function buildFile(config: ResolvedConfig, filename: string): Promi
 
   for (const plugin of plugins) {
     // call ondone hooks
-    plugin.ondone?.(buildResult)
+    await plugin.ondone?.(buildResult)
   }
 
   return buildResult

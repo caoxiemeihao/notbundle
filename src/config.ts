@@ -37,14 +37,14 @@ export interface Configuration {
       code: string
       /** Skip subsequent transform hooks */
       done: () => void
-    }) => string | null | void | import('@swc/core').Output | Promise<string | null | void | import('@swc/core').Output>
+    }) => string | null | void | { code: string; map?: string } | Promise<string | null | void | { code: string; map?: string }>
     /** Triggered when `transform()` ends or a file in `extensions` is removed */
     ondone?: (args: {
       filename: string
       code: string
       map?: string
       destname?: string
-    }) => void
+    }) => void | Promise<void>
   }[],
   /** Custom log. If `logger` is passed, all logs will be input this option */
   logger?: {
