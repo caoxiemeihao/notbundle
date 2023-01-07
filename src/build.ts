@@ -84,7 +84,7 @@ export async function buildFile(config: ResolvedConfig, filename: string): Promi
 
   for (const plugin of plugins) {
     // call ondone hooks
-    plugin.ondone?.(buildResult)
+    await plugin.ondone?.(buildResult)
   }
 
   return buildResult

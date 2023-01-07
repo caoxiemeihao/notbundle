@@ -44,7 +44,7 @@ export interface Configuration {
       code: string
       map?: string
       destname?: string
-    }) => void
+    }) => void | Promise<void>
   }[],
   /** Custom log. If `logger` is passed, all logs will be input this option */
   logger?: {
