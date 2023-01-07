@@ -1,3 +1,8 @@
+## 0.3.4 (2023-01-07)
+
+- 525015e chore: cleanup
+- 0d61b9b feat: `ondone` support Promise
+
 ## 0.3.3 (2022-12-27)
 
 - ef98ee9 fix: include2globs try resolve files
