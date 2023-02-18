@@ -1,3 +1,7 @@
+## 0.4.0 (2023-02-18)
+
+- 9c8a4f9 refactor: `input2output` instead `replace2dest`
+
 ## 0.3.4 (2023-01-07)
 
 - 525015e chore: cleanup
