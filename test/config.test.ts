@@ -57,7 +57,7 @@ describe('src/config', () => {
 
     expectTypeOf(experimental.include2files).toBeFunction()
     expectTypeOf(experimental.include2globs).toBeFunction()
-    expectTypeOf(experimental.replace2dest).toBeFunction()
+    expectTypeOf(experimental.input2output).toBeFunction()
   })
 
   it('resolveConfig.experimental', async () => {
@@ -65,7 +65,7 @@ describe('src/config', () => {
     const {
       include2files,
       include2globs,
-      replace2dest,
+      input2output,
     } = resolved.experimental
     const input = path.join(__dirname, 'fixture/input')
     const dirs = fs.readdirSync(input)
@@ -78,6 +78,6 @@ describe('src/config', () => {
 
     const basename = dirs[0] // main.ts
     const destname = path.posix.join(root, 'output', basename.replace('.ts', '.js'))
-    expect(replace2dest(files2[0])).eq(destname)
+    expect(input2output(resolved, files2[0])).eq(destname)
   })
 })
