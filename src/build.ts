@@ -27,7 +27,7 @@ export async function buildFile(config: ResolvedConfig, filename: string): Promi
   } = config
   let code = fs.readFileSync(filename, 'utf8')
   let map: string | undefined // TODO: merge map 🤔
-  const destname = experimental.replace2dest(filename)
+  const destname = experimental.input2output(config, filename)
   const buildResult = { filename, destname } as BuildResult
 
   let done = false
