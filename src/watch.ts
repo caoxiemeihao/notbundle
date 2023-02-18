@@ -16,7 +16,7 @@ export async function watch(config: Configuration): Promise<FSWatcher> {
   // There can't be any await statement here, it will cause `watcher.on` to miss the first trigger.
   watcher?.on('all', (event, _filepath) => {
     const filepath = normalizePath(_filepath)
-    const destpath = experimental.replace2dest(filepath)
+    const destpath = experimental.input2output(resolved, filepath)
 
     // call onwatch hooks
     for (const plugin of plugins) {

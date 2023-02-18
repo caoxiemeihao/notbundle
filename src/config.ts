@@ -77,7 +77,7 @@ export interface ResolvedConfig {
     include2files: (config: ResolvedConfig, include?: string[]) => string[]
     include2globs: (config: ResolvedConfig, include?: string[]) => string[]
     /** If include contains only one item, it will remove 1 level of dir 🤔 */
-    replace2dest: (filename: string) => string | undefined
+    input2output: (config: ResolvedConfig, filename: string) => string | undefined
   }
 }
 
@@ -111,7 +111,7 @@ export async function resolveConfig(config: Configuration): Promise<ResolvedConf
     experimental: {
       include2files,
       include2globs,
-      replace2dest: (filename: string) => input2output(resolved, filename),
+      input2output,
     },
   }
 
