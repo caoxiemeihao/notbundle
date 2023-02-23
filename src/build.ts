@@ -6,7 +6,7 @@ import {
   type Plugin,
   resolveConfig,
 } from './config'
-import { ensureDir } from './utils'
+import { ensureDir, jsType } from './utils'
 
 export type BuildResult = Parameters<NonNullable<Plugin['ondone']>>[0]
 
@@ -14,6 +14,7 @@ export async function build(config: Configuration): Promise<BuildResult[]> {
   const resolved = await resolveConfig(config)
   return Promise.all(
     resolved.experimental.include2files(resolved)
+      .filter(filename => jsType(filename).js)
       .map(filename => buildFile(resolved, filename))
   )
 }
